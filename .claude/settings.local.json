@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg)",
+      "Bash(curl -fsSL \"https://github.com/cli/cli/releases/latest\" -o /dev/null -w \"%{redirect_url}\")",
+      "Bash(curl -s https://api.github.com/repos/cli/cli/releases/latest)",
+      "Bash(curl -sI \"https://github.com/cli/cli/releases/latest\")",
+      "Bash(mkdir -p /tmp/gh-install)",
+      "Bash(curl -fsSL \"https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_macOS_arm64.zip\" -o /tmp/gh-install/gh.zip)",
+      "Bash(unzip -o /tmp/gh-install/gh.zip -d /tmp/gh-install)"
+    ]
+  }
+}
