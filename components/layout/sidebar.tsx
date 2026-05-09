@@ -21,7 +21,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTag = searchParams.get("tag");
-  const isHome = !currentTag && pathname === "/dashboard";
+  const isFavorite = searchParams.get("favorite") === "true";
+  const isHome = !currentTag && !isFavorite && pathname === "/dashboard";
 
   return (
     <>
@@ -40,7 +41,7 @@ export function Sidebar() {
           </Link>
           <Link
             href="/dashboard?favorite=true"
-            className={navLinkClasses(searchParams.get("favorite") === "true")}
+            className={navLinkClasses(isFavorite)}
           >
             <Heart className="w-4 h-4" />
             收藏
@@ -87,14 +88,15 @@ export function Sidebar() {
           <Menu className="w-5 h-5" />
         </SheetTrigger>
         <SheetContent side="left" className="w-60 p-0 bg-[#faf8f5]">
-          <MobileSidebar currentTag={currentTag} />
+          <MobileSidebar currentTag={currentTag} isFavorite={isFavorite} />
         </SheetContent>
       </Sheet>
     </>
   );
 }
 
-function MobileSidebar({ currentTag }: { currentTag: string | null }) {
+function MobileSidebar({ currentTag, isFavorite }: { currentTag: string | null; isFavorite: boolean }) {
+  const isHome = !currentTag && !isFavorite;
   return (
     <div className="flex flex-col h-full">
       <div className="p-5">
@@ -104,10 +106,10 @@ function MobileSidebar({ currentTag }: { currentTag: string | null }) {
       </div>
       <Separator className="bg-[#e8dfd5]" />
       <div className="p-3 space-y-1">
-        <Link href="/dashboard" className={navLinkClasses(!currentTag)}>
+        <Link href="/dashboard" className={navLinkClasses(isHome)}>
           所有灵感
         </Link>
-        <Link href="/dashboard?favorite=true" className={navLinkClasses(false)}>
+        <Link href="/dashboard?favorite=true" className={navLinkClasses(isFavorite)}>
           <Heart className="w-4 h-4" />
           收藏
         </Link>
