@@ -9,7 +9,7 @@ export async function getOrCreateUser(): Promise<string> {
 
   if (!user) {
     user = await prisma.user.create({
-      data: { name: "Demo", email: "demo@girl.studio" },
+      data: { name: "Demo", email: "demo@beauty.studio" },
     });
   }
 

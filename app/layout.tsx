@@ -16,7 +16,7 @@ const notoSerifSC = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
-  title: "Girl Studio — 审美灵感库",
+  title: "Beauty Studio — 审美灵感库",
   description: "记录所有打动你的审美碎片",
 };
 

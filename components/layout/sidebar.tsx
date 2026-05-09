@@ -27,8 +27,8 @@ export function Sidebar() {
     <>
       <aside className="hidden md:flex w-60 flex-col border-r border-[#e8dfd5] bg-[#faf8f5] h-full">
         <div className="p-5">
-          <Link href="/dashboard" className="font-[family-name:var(--font-serif)] text-xl font-semibold tracking-wider no-underline text-[#2c2c2c]">
-            Girl
+          <Link href="/" className="font-[family-name:var(--font-serif)] text-xl font-semibold tracking-wider no-underline text-[#2c2c2c]">
+            Beauty
           </Link>
         </div>
 
@@ -98,8 +98,8 @@ function MobileSidebar({ currentTag }: { currentTag: string | null }) {
   return (
     <div className="flex flex-col h-full">
       <div className="p-5">
-        <Link href="/dashboard" className="font-[family-name:var(--font-serif)] text-xl font-semibold tracking-wider no-underline text-[#2c2c2c]">
-          Girl
+        <Link href="/" className="font-[family-name:var(--font-serif)] text-xl font-semibold tracking-wider no-underline text-[#2c2c2c]">
+          Beauty
         </Link>
       </div>
       <Separator className="bg-[#e8dfd5]" />

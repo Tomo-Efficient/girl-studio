@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -52,17 +51,10 @@ export function TagInput({ selectedTags, onChange }: TagInputProps) {
           />
         ))}
         <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger>
-            <Button
-              variant="outline"
-              size="sm"
-              role="combobox"
-              className="h-7 gap-1 text-xs border-[#e8dfd5] font-light"
-            >
-              <Plus className="w-3 h-3" />
-              添加标签
-              <ChevronsUpDown className="w-3 h-3 opacity-50" />
-            </Button>
+          <PopoverTrigger className="inline-flex items-center gap-1 h-7 px-2.5 rounded-sm text-xs font-light border border-[#e8dfd5] bg-background hover:bg-[#f2ede7] transition-colors cursor-pointer">
+            <Plus className="w-3 h-3" />
+            添加标签
+            <ChevronsUpDown className="w-3 h-3 opacity-50" />
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-0" align="start">
             <CreatableTagCommand

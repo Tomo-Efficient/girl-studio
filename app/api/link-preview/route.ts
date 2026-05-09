@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const response = await fetch(parsed.toString(), {
-      headers: { "User-Agent": "GirlStudio/1.0" },
+      headers: { "User-Agent": "BeautyStudio/1.0" },
       signal: AbortSignal.timeout(8000),
     });
 
