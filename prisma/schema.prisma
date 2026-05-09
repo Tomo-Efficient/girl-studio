@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ItemType {
+  IMAGE
+  TEXT
+  LINK
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String?
+  name      String?
+  avatarUrl String?
+
+  items       Item[]
+  tags        Tag[]
+  collections Collection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  type        ItemType
+  title       String?
+  description String?
+
+  // IMAGE
+  imageUrl     String?
+  thumbnailUrl String?
+  imageWidth   Int?
+  imageHeight  Int?
+
+  // TEXT
+  textContent String?
+  textLength  Int?
+
+  // LINK
+  linkUrl         String?
+  linkTitle       String?
+  linkDescription String?
+  linkImageUrl    String?
+  linkFavicon     String?
+
+  // Source attribution
+  sourceName String?
+  sourceUrl  String?
+
+  // Relations
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tags       ItemTag[]
+  collectionId String?
+  collection  Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  isFavorite Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, createdAt])
+}
+
+model Tag {
+  id     String @id @default(cuid())
+  name   String
+  slug   String
+  color  String?
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items ItemTag[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+model ItemTag {
+  itemId String
+  tagId  String
+  item   Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+}
+
+model Collection {
+  id          String @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items Item[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
