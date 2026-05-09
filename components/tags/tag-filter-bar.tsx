@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { currentUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TagBadge } from "@/components/tags/tag-badge";
 
@@ -8,14 +8,10 @@ interface TagFilterBarProps {
 }
 
 export async function TagFilterBar({ currentTag }: TagFilterBarProps) {
-  const { userId } = await auth();
-  if (!userId) return null;
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) return null;
+  const userId = await currentUserId();
 
   const tags = await prisma.tag.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { name: "asc" },
     include: { _count: { select: { items: true } } },
   });

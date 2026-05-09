@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { currentUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 
@@ -9,14 +9,10 @@ const TAG_COLORS = [
 ];
 
 export async function GET() {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  const userId = await currentUserId();
 
   const tags = await prisma.tag.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { name: "asc" },
     include: { _count: { select: { items: true } } },
   });
@@ -25,16 +21,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
+  const userId = await currentUserId();
   const { name, color } = await req.json();
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
-    return NextResponse.json({ error: "Tag name is required" }, { status: 400 });
+    return NextResponse.json({ error: "Tag name required" }, { status: 400 });
   }
 
   const slug = slugify(name.trim());
@@ -42,22 +33,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid tag name" }, { status: 400 });
   }
 
-  const assignedColor = color || TAG_COLORS[Math.floor(Math.random() * TAG_COLORS.length)];
-
   const existing = await prisma.tag.findUnique({
-    where: { userId_slug: { userId: user.id, slug } },
+    where: { userId_slug: { userId, slug } },
   });
 
-  if (existing) {
-    return NextResponse.json(existing);
-  }
+  if (existing) return NextResponse.json(existing);
 
   const tag = await prisma.tag.create({
     data: {
       name: name.trim(),
       slug,
-      color: assignedColor,
-      userId: user.id,
+      color: color || TAG_COLORS[Math.floor(Math.random() * TAG_COLORS.length)],
+      userId,
     },
   });
 

@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 enum ItemType {
@@ -14,11 +14,9 @@ enum ItemType {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String?
-  name      String?
-  avatarUrl String?
+  id    String @id @default(cuid())
+  name  String @default("User")
+  email String @default("")
 
   items       Item[]
   tags        Tag[]
@@ -34,34 +32,29 @@ model Item {
   title       String?
   description String?
 
-  // IMAGE
   imageUrl     String?
   thumbnailUrl String?
   imageWidth   Int?
   imageHeight  Int?
 
-  // TEXT
   textContent String?
   textLength  Int?
 
-  // LINK
   linkUrl         String?
   linkTitle       String?
   linkDescription String?
   linkImageUrl    String?
   linkFavicon     String?
 
-  // Source attribution
   sourceName String?
   sourceUrl  String?
 
-  // Relations
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  tags       ItemTag[]
+  tags         ItemTag[]
   collectionId String?
-  collection  Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
 
   isFavorite Boolean @default(false)
   sortOrder  Int     @default(0)
@@ -75,10 +68,10 @@ model Item {
 }
 
 model Tag {
-  id     String @id @default(cuid())
-  name   String
-  slug   String
-  color  String?
+  id   String @id @default(cuid())
+  name String
+  slug String
+  color String?
 
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)

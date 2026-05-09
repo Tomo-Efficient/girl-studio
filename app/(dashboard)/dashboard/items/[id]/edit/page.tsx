@@ -1,5 +1,5 @@
-import { notFound, redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
+import { currentUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 interface EditItemPageProps {
@@ -7,19 +7,12 @@ interface EditItemPageProps {
 }
 
 export default async function EditItemPage({ params }: EditItemPageProps) {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) redirect("/sign-in");
-
+  const userId = await currentUserId();
   const { id } = await params;
 
   const item = await prisma.item.findFirst({
-    where: { id, userId: user.id },
-    include: {
-      tags: { include: { tag: true } },
-    },
+    where: { id, userId },
+    include: { tags: { include: { tag: true } } },
   });
 
   if (!item) notFound();
@@ -28,9 +21,8 @@ export default async function EditItemPage({ params }: EditItemPageProps) {
     <div className="max-w-2xl mx-auto py-8">
       <h2 className="font-[family-name:var(--font-serif)] text-2xl font-light mb-6">编辑灵感</h2>
       <p className="text-sm text-[var(--muted-foreground)]">
-        编辑功能将在下一步完成。目前你可以修改基本信息。
+        编辑功能将在下一步完成。
       </p>
-      {/* Simplified edit for now — full form reuse in a future iteration */}
     </div>
   );
 }

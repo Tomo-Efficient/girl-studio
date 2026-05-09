@@ -1,5 +1,5 @@
-import { notFound, redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
+import { currentUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemDetail } from "@/components/items/item-detail";
 
@@ -8,16 +8,11 @@ interface ItemDetailPageProps {
 }
 
 export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) redirect("/sign-in");
-
+  const userId = await currentUserId();
   const { id } = await params;
 
   const item = await prisma.item.findFirst({
-    where: { id, userId: user.id },
+    where: { id, userId },
     include: {
       tags: { include: { tag: true } },
       collection: { select: { id: true, name: true, slug: true } },

@@ -1,14 +1,9 @@
-import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import sharp from "sharp";
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
 
@@ -26,31 +21,33 @@ export async function POST(req: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`;
+    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadsDir, { recursive: true });
 
-    // Upload original
-    const blob = await put(filename, buffer, {
-      access: "public",
-      contentType: file.type,
-    });
+    const baseName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`;
+    const filename = `${baseName}.webp`;
+    const filepath = path.join(uploadsDir, filename);
+    const thumbFilename = `${baseName}-thumb.webp`;
+    const thumbFilepath = path.join(uploadsDir, thumbFilename);
 
-    // Generate thumbnail (600px wide, webp, quality 80)
+    // Save optimized original as WebP
+    const optimized = await sharp(buffer)
+      .webp({ quality: 85 })
+      .toBuffer();
+    await writeFile(filepath, optimized);
+
+    // Generate thumbnail
     const thumbnail = await sharp(buffer)
       .resize(600, undefined, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 80 })
       .toBuffer();
+    await writeFile(thumbFilepath, thumbnail);
 
-    const thumbBlob = await put(`${filename}-thumb.webp`, thumbnail, {
-      access: "public",
-      contentType: "image/webp",
-    });
-
-    // Get original dimensions
     const metadata = await sharp(buffer).metadata();
 
     return NextResponse.json({
-      url: blob.url,
-      thumbnailUrl: thumbBlob.url,
+      url: `/uploads/${filename}`,
+      thumbnailUrl: `/uploads/${thumbFilename}`,
       width: metadata.width,
       height: metadata.height,
     });

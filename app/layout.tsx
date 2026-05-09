@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Serif_SC } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -27,16 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html
-        lang="zh-CN"
-        className={`${inter.variable} ${notoSerifSC.variable} h-full antialiased`}
-      >
-        <body className="min-h-full flex flex-col">
-          {children}
-          <Toaster position="bottom-center" richColors closeButton />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html
+      lang="zh-CN"
+      className={`${inter.variable} ${notoSerifSC.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster position="bottom-center" richColors closeButton />
+      </body>
+    </html>
   );
 }

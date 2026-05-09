@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { UserButton, useUser } from "@clerk/nextjs";
-import { Plus, Heart, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Plus, Heart, Menu, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -27,7 +25,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 flex-col border-r border-[#e8dfd5] bg-[#faf8f5] h-full">
         <div className="p-5">
           <Link href="/dashboard" className="font-[family-name:var(--font-serif)] text-xl font-semibold tracking-wider no-underline text-[#2c2c2c]">
@@ -78,16 +75,13 @@ export function Sidebar() {
         </div>
 
         <div className="p-4 flex items-center gap-3 border-t border-[#e8dfd5]">
-          <UserButton
-            appearance={{
-              elements: { avatarBox: "w-8 h-8" },
-            }}
-          />
-          <UserDisplayName />
+          <div className="w-8 h-8 rounded-full bg-[#f2ede7] flex items-center justify-center">
+            <User className="w-4 h-4 text-[var(--muted-foreground)]" />
+          </div>
+          <span className="text-sm font-light truncate">Demo</span>
         </div>
       </aside>
 
-      {/* Mobile toggle */}
       <Sheet>
         <SheetTrigger className="md:hidden absolute top-3 left-3 z-50 inline-flex items-center justify-center size-8 rounded-sm hover:bg-[#f2ede7] text-[#2c2c2c]">
           <Menu className="w-5 h-5" />
@@ -98,13 +92,6 @@ export function Sidebar() {
       </Sheet>
     </>
   );
-}
-
-function UserDisplayName() {
-  const { user } = useUser();
-  if (!user) return null;
-  const name = user.firstName || user.emailAddresses[0]?.emailAddress?.split("@")[0] || "User";
-  return <span className="text-sm font-light truncate">{name}</span>;
 }
 
 function MobileSidebar({ currentTag }: { currentTag: string | null }) {
@@ -133,8 +120,10 @@ function MobileSidebar({ currentTag }: { currentTag: string | null }) {
         </Link>
       </div>
       <div className="mt-auto p-4 border-t border-[#e8dfd5] flex items-center gap-3">
-        <UserButton />
-        <UserDisplayName />
+        <div className="w-8 h-8 rounded-full bg-[#f2ede7] flex items-center justify-center">
+          <User className="w-4 h-4 text-[var(--muted-foreground)]" />
+        </div>
+        <span className="text-sm font-light truncate">Demo</span>
       </div>
     </div>
   );

@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { currentUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { slugify } from "@/lib/utils";
 import type { ItemCreateInput } from "@/types";
 
 export async function GET(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
+  const userId = await currentUserId();
 
   const { searchParams } = req.nextUrl;
   const q = searchParams.get("q");
@@ -26,7 +17,7 @@ export async function GET(req: NextRequest) {
   const cursor = searchParams.get("cursor");
   const limit = Math.min(parseInt(searchParams.get("limit") || "24"), 48);
 
-  const where: Prisma.ItemWhereInput = { userId: user.id };
+  const where: Prisma.ItemWhereInput = { userId };
 
   if (type && ["IMAGE", "TEXT", "LINK"].includes(type)) {
     where.type = type as Prisma.EnumItemTypeFilter["equals"];
@@ -34,16 +25,16 @@ export async function GET(req: NextRequest) {
 
   if (q) {
     where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-      { textContent: { contains: q, mode: "insensitive" } },
-      { linkTitle: { contains: q, mode: "insensitive" } },
-      { sourceName: { contains: q, mode: "insensitive" } },
+      { title: { contains: q } },
+      { description: { contains: q } },
+      { textContent: { contains: q } },
+      { linkTitle: { contains: q } },
+      { sourceName: { contains: q } },
     ];
   }
 
   if (tag) {
-    where.tags = { some: { tag: { slug: tag, userId: user.id } } };
+    where.tags = { some: { tag: { slug: tag, userId } } };
   }
 
   if (collectionId) {
@@ -76,32 +67,18 @@ export async function GET(req: NextRequest) {
     nextCursor = next!.id;
   }
 
-  return NextResponse.json({
-    items,
-    nextCursor,
-    total: items.length,
-  });
+  return NextResponse.json({ items, nextCursor });
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-
+  const userId = await currentUserId();
   const body: ItemCreateInput = await req.json();
-
   const { tagIds, collectionId, textContent, ...rest } = body;
 
   const data: Prisma.ItemCreateInput = {
     ...rest,
     textLength: textContent ? textContent.length : undefined,
-    user: { connect: { id: user.id } },
+    user: { connect: { id: userId } },
   };
 
   if (tagIds && tagIds.length > 0) {

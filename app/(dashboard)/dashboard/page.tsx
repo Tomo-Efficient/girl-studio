@@ -1,5 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { currentUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ItemGrid } from "@/components/items/item-grid";
 import { TagFilterBar } from "@/components/tags/tag-filter-bar";
@@ -16,16 +15,11 @@ interface DashboardPageProps {
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) redirect("/sign-in");
-
+  const userId = await currentUserId();
   const params = await searchParams;
   const { q, type, tag, favorite, sort } = params;
 
-  const where: Prisma.ItemWhereInput = { userId: user.id };
+  const where: Prisma.ItemWhereInput = { userId };
 
   if (type && ["IMAGE", "TEXT", "LINK"].includes(type)) {
     where.type = type as Prisma.EnumItemTypeFilter["equals"];
@@ -33,16 +27,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   if (q) {
     where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-      { textContent: { contains: q, mode: "insensitive" } },
-      { linkTitle: { contains: q, mode: "insensitive" } },
-      { sourceName: { contains: q, mode: "insensitive" } },
+      { title: { contains: q } },
+      { description: { contains: q } },
+      { textContent: { contains: q } },
+      { linkTitle: { contains: q } },
+      { sourceName: { contains: q } },
     ];
   }
 
   if (tag) {
-    where.tags = { some: { tag: { slug: tag, userId: user.id } } };
+    where.tags = { some: { tag: { slug: tag, userId } } };
   }
 
   if (favorite === "true") {
